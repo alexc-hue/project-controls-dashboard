@@ -1,0 +1,11 @@
+risk_id,description,category,probability,impact,status,mitigation_owner,mitigation_due_date
+R01,Long-lead switchgear delivery delay,Procurement,4,5,Open,Procurement Lead,2026-07-01
+R02,Site geotechnical conditions differ from survey,Design,3,4,Mitigating,Site Engineer,2026-08-15
+R03,Subcontractor labor shortage during peak civil works,Construction,3,3,Closed,Site Manager,2026-06-01
+R04,Utility interconnection approval delay,Regulatory,2,5,Open,Project Manager,2026-11-01
+R05,Currency fluctuation on imported equipment,Commercial,2,3,Open,Procurement Lead,2026-12-01
+R06,Design change request from client (scope creep),Design,3,3,Mitigating,Design Lead,2026-08-01
+R07,Weather-related delays during civil works,Construction,4,2,Closed,Site Manager,2026-06-15
+R08,Commissioning test equipment availability,Commissioning,2,4,Open,Commissioning Lead,2026-11-20
+R09,Health and safety incident risk during electrical works,HSE,2,5,Open,HSE Manager,2026-10-30
+R10,Cost overrun on rework from civil delay,Commercial,4,4,Mitigating,Project Controls,2026-09-15
