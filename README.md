@@ -65,6 +65,9 @@ Forecast completion (SPI-adjusted): 2027-03-19 (planned: 2027-01-31)
 Plus a milestone list with slip-in-days, and the top risks ranked by exposure
 with overdue mitigations flagged.
 
+A saved copy of this report is generated alongside the charts: see
+[assets/report.md](assets/report.md).
+
 ## Screenshots
 
 **Cost & schedule performance (S-curve)** — planned vs. earned vs. actual, with

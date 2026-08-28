@@ -85,6 +85,62 @@ def print_risks(risks) -> None:
     print(f"Open risks: {open_count}   Overdue mitigations: {overdue_count}")
 
 
+def write_report_markdown(summary: dict, forecast_finish, milestones, risks) -> None:
+    lines = [
+        f"# Project Status Report — as of {summary['status_period']}",
+        "",
+        f"**Percent complete (earned):** {summary['percent_complete']:.1f}%",
+        "",
+        "## Earned Value",
+        "",
+        "| Metric | Value |",
+        "|---|---|",
+        f"| Planned Value (PV) | {money(summary['pv'])} |",
+        f"| Earned Value (EV) | {money(summary['ev'])} |",
+        f"| Actual Cost (AC) | {money(summary['ac'])} |",
+        f"| Schedule Variance (SV) | {money(summary['sv'])} ({summary['sv_pct']:+.1f}%) |",
+        f"| Cost Variance (CV) | {money(summary['cv'])} ({summary['cv_pct']:+.1f}%) |",
+        f"| SPI | {summary['spi']:.2f} |",
+        f"| CPI | {summary['cpi']:.2f} |",
+        f"| Estimate at Completion (EAC) | {money(summary['eac'])} |",
+        f"| Estimate to Complete (ETC) | {money(summary['etc'])} |",
+        f"| Variance at Completion (VAC) | {money(summary['vac'])} "
+        f"({'over' if summary['vac'] < 0 else 'under'} budget) |",
+        f"| To-Complete Performance Index (TCPI) | {summary['tcpi']:.2f} |",
+        "",
+        f"**Forecast completion (SPI-adjusted):** {forecast_finish.date()} "
+        f"(planned: {PLANNED_FINISH})",
+        "",
+        "## Milestones",
+        "",
+        "| Status | Milestone | Planned | Actual/Forecast | Slip |",
+        "|---|---|---|---|---|",
+    ]
+    for _, row in milestones.iterrows():
+        tag = "actual" if row["date_type"] == "Actual" else "forecast"
+        lines.append(
+            f"| {row['milestone_status']} | {row['milestone']} | {row['planned_date'].date()} "
+            f"| {row['current_date'].date()} ({tag}) | {row['slip_days']:+d}d |"
+        )
+
+    lines += ["", "## Top Risks by Exposure (probability x impact)", "",
+              "| Risk | Category | Exposure | Description | Overdue |",
+              "|---|---|---|---|---|"]
+    for _, row in risks.head(5).iterrows():
+        overdue_flag = "Yes" if row["overdue"] else ""
+        lines.append(
+            f"| {row['risk_id']} | {row['category']} | {row['exposure']} "
+            f"| {row['description']} | {overdue_flag} |"
+        )
+
+    overdue_count = int(risks["overdue"].sum())
+    open_count = int((risks["status"] != "Closed").sum())
+    lines += ["", f"**Open risks:** {open_count}   **Overdue mitigations:** {overdue_count}", ""]
+
+    with open(os.path.join(ASSETS_DIR, "report.md"), "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
+
+
 def chart_s_curve(ts, summary, forecast_finish) -> None:
     fig, ax = plt.subplots(figsize=(9, 5.5))
     ax.plot(ts["period_label"].to_numpy(), ts["planned_value_cum"].to_numpy(),
@@ -209,10 +265,11 @@ def main() -> None:
     chart_spi_cpi_trend(ts)
     chart_milestones(milestones)
     chart_risk_matrix(risks)
+    write_report_markdown(summary, forecast_finish, milestones, risks)
 
     print()
     print("-" * 60)
-    print(f"Charts saved to {ASSETS_DIR}")
+    print(f"Charts and report.md saved to {ASSETS_DIR}")
 
 
 if __name__ == "__main__":
