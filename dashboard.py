@@ -2,8 +2,9 @@
 Project Controls Dashboard
 ---------------------------
 Reads a fictional infrastructure project's cost/schedule timeseries, milestone
-log, and risk register, computes standard project controls metrics (EVM,
-milestone slippage, risk exposure), prints a status report, and saves charts.
+log, risk register, and change register, computes standard project controls
+metrics (EVM, milestone slippage, risk exposure, change impact), prints a
+status report, and saves charts.
 
 Run:
     pip install -r requirements.txt
@@ -85,7 +86,42 @@ def print_risks(risks) -> None:
     print(f"Open risks: {open_count}   Overdue mitigations: {overdue_count}")
 
 
-def write_report_markdown(summary: dict, forecast_finish, milestones, risks) -> None:
+def print_changes(changes, change_summary: dict) -> None:
+    print()
+    print("-" * 60)
+    print("CHANGE REGISTER")
+    print("-" * 60)
+    for _, row in changes.iterrows():
+        print(f"{row['change_id']}  {money(row['cost_impact']):>10}  "
+              f"{row['schedule_impact_days']:+3d}d  ({row['category']}, {row['status']})  "
+              f"{row['description']}")
+    print()
+    print(f"Approved changes: {money(change_summary['approved_cost_impact'])}  "
+          f"({change_summary['approved_schedule_days']:+d} days)")
+    print(f"Revised budget (BAC + approved changes): {money(change_summary['revised_budget'])}")
+    print(f"Pending: {change_summary['pending_count']} change(s), "
+          f"{money(change_summary['pending_cost_exposure'])} exposure, "
+          f"{change_summary['pending_schedule_exposure_days']:+d} days exposure")
+
+
+def chart_change_register(changes) -> None:
+    ranked = changes.sort_values("cost_impact")
+    colors = ["#4C72B0" if s == "Approved" else "#DD8452" for s in ranked["status"]]
+    fig, ax = plt.subplots(figsize=(9, 5))
+    ax.barh(ranked["change_id"] + " - " + ranked["category"], ranked["cost_impact"], color=colors)
+    ax.axvline(0, color="black", linewidth=0.8)
+    ax.set_xlabel("Cost impact ($)")
+    ax.set_title("Change Register: Cost Impact by Change")
+    handles = [plt.Rectangle((0, 0), 1, 1, color="#4C72B0", label="Approved"),
+               plt.Rectangle((0, 0), 1, 1, color="#DD8452", label="Pending")]
+    ax.legend(handles=handles, loc="lower right", fontsize=8)
+    ax.grid(alpha=0.3, axis="x")
+    fig.tight_layout()
+    fig.savefig(os.path.join(ASSETS_DIR, "change_register.png"), dpi=140)
+    plt.close(fig)
+
+
+def write_report_markdown(summary: dict, forecast_finish, milestones, risks, changes, change_summary: dict) -> None:
     lines = [
         f"# Project Status Report — as of {summary['status_period']}",
         "",
@@ -136,6 +172,26 @@ def write_report_markdown(summary: dict, forecast_finish, milestones, risks) -> 
     overdue_count = int(risks["overdue"].sum())
     open_count = int((risks["status"] != "Closed").sum())
     lines += ["", f"**Open risks:** {open_count}   **Overdue mitigations:** {overdue_count}", ""]
+
+    lines += ["", "## Change Register", "",
+              "| Change | Cost Impact | Schedule Impact | Category | Status | Description |",
+              "|---|---|---|---|---|---|"]
+    for _, row in changes.iterrows():
+        lines.append(
+            f"| {row['change_id']} | {money(row['cost_impact'])} "
+            f"| {row['schedule_impact_days']:+d}d | {row['category']} | {row['status']} "
+            f"| {row['description']} |"
+        )
+    lines += [
+        "",
+        f"**Approved changes:** {money(change_summary['approved_cost_impact'])} "
+        f"({change_summary['approved_schedule_days']:+d} days)  ",
+        f"**Revised budget (BAC + approved changes):** {money(change_summary['revised_budget'])}  ",
+        f"**Pending:** {change_summary['pending_count']} change(s), "
+        f"{money(change_summary['pending_cost_exposure'])} exposure, "
+        f"{change_summary['pending_schedule_exposure_days']:+d} days exposure",
+        "",
+    ]
 
     with open(os.path.join(ASSETS_DIR, "report.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(lines))
@@ -251,21 +307,25 @@ def main() -> None:
     ts = metrics.load_timeseries(os.path.join(DATA_DIR, "cost_schedule_timeseries.csv"))
     milestones = metrics.load_milestones(os.path.join(DATA_DIR, "milestones.csv"))
     risks = metrics.load_risk_register(os.path.join(DATA_DIR, "risk_register.csv"), STATUS_DATE)
+    changes = metrics.load_change_register(os.path.join(DATA_DIR, "change_register.csv"))
 
     summary = metrics.project_summary(ts, BAC)
     forecast_finish = metrics.forecast_completion_date(
         milestones, summary["spi"], PROJECT_START, PLANNED_FINISH
     )
+    change_summary = metrics.change_impact_summary(changes, BAC)
 
     print_summary(summary, forecast_finish)
     print_milestones(milestones)
     print_risks(risks)
+    print_changes(changes, change_summary)
 
     chart_s_curve(ts, summary, forecast_finish)
     chart_spi_cpi_trend(ts)
     chart_milestones(milestones)
     chart_risk_matrix(risks)
-    write_report_markdown(summary, forecast_finish, milestones, risks)
+    chart_change_register(changes)
+    write_report_markdown(summary, forecast_finish, milestones, risks, changes, change_summary)
 
     print()
     print("-" * 60)

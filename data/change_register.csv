@@ -1,0 +1,9 @@
+change_id,description,category,cost_impact,schedule_impact_days,status,date_raised
+CH01,Client-requested upgrade to switchgear rating,Client Request,45000,10,Approved,2026-04-02
+CH02,Additional geotechnical investigation following unexpected ground conditions,Design,18000,5,Approved,2026-04-20
+CH03,Revised fire protection code requirement from local authority,Regulatory,32000,8,Approved,2026-05-10
+CH04,Scope reduction: remove redundant spare feeder bay,Scope,-22000,0,Approved,2026-05-25
+CH05,Extended commissioning support requested by client operations team,Client Request,15000,4,Pending,2026-08-10
+CH06,Additional cable tray due to updated cable schedule,Design,9000,2,Approved,2026-06-05
+CH07,Contractor claim for weather-related standby time,Commercial,27000,0,Pending,2026-07-15
+CH08,Upgrade SCADA historian license tier for extended data retention,Client Request,6000,0,Approved,2026-06-20

@@ -1,9 +1,9 @@
 # Project Controls Dashboard
 
 A Python tool that turns raw project data — a cost/schedule timeseries, a milestone log,
-and a risk register — into the standard project controls picture: earned value
-performance, schedule slippage, and risk exposure, complete with charts and a
-status report.
+a risk register, and a change register — into the standard project controls picture:
+earned value performance, schedule slippage, risk exposure, and change impact,
+complete with charts and a status report.
 
 ## Problem
 
@@ -16,16 +16,21 @@ would hand to a steering committee.
 
 ## Approach
 
-- Model the project as three inputs a controls function already tracks: a
+- Model the project as four inputs a controls function already tracks: a
   cumulative PV/EV/AC timeseries, a milestone log (planned vs. actual/forecast
-  dates), and a risk register (probability × impact, mitigation owners and due
-  dates).
+  dates), a risk register (probability × impact, mitigation owners and due
+  dates), and a change register (cost/schedule impact, approval status).
 - Compute standard EVM metrics (SV, CV, SPI, CPI, EAC, ETC, VAC, TCPI) as of the
   latest reporting period, plus an SPI-adjusted forecast completion date.
 - Classify each milestone as On Track / At Risk / Delayed from its slip in days,
   and flag risks whose mitigation is overdue.
-- Render four charts (S-curve, SPI/CPI trend, milestone timeline, risk matrix)
-  and print a console status report in the same shape a weekly report would use.
+- Sum approved changes into a revised budget (BAC plus approved cost impact),
+  reported separately from CPI/EAC rather than folded into them, so
+  performance variance (how the work is going) stays distinguishable from
+  scope-change variance (how much the baseline itself moved).
+- Render five charts (S-curve, SPI/CPI trend, milestone timeline, risk matrix,
+  change register) and print a console status report in the same shape a
+  weekly report would use.
 
 The sample data is a fictional 12-month infrastructure project (substation
 upgrade) that starts on plan and slips from month five onward — chosen
@@ -88,6 +93,10 @@ status.
 
 ![Risk matrix](assets/risk_matrix.png)
 
+**Change register** — cost impact by change, approved vs. pending.
+
+![Change register](assets/change_register.png)
+
 ## What I learned
 
 Framing this as "what would I actually hand to a steering committee" rather
@@ -107,4 +116,5 @@ python dashboard.py
 ```
 
 Swap in your own `data/cost_schedule_timeseries.csv`, `data/milestones.csv`,
-and `data/risk_register.csv` (same columns) to point it at a real project.
+`data/risk_register.csv`, and `data/change_register.csv` (same columns) to
+point it at a real project.

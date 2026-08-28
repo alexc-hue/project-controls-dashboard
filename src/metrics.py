@@ -75,6 +75,32 @@ def load_risk_register(path: str, status_date: str) -> pd.DataFrame:
     return df.sort_values("exposure", ascending=False).reset_index(drop=True)
 
 
+def load_change_register(path: str) -> pd.DataFrame:
+    df = pd.read_csv(path, parse_dates=["date_raised"])
+    return df.sort_values("cost_impact", ascending=False).reset_index(drop=True)
+
+
+def change_impact_summary(changes: pd.DataFrame, bac: float) -> dict:
+    """Cost/schedule impact of the change register, split approved vs pending.
+
+    Reported alongside the EVM summary, not fed back into CPI/EAC: this keeps
+    performance variance (how well the work is being executed) separate from
+    scope-change variance (how much the baseline itself has moved), which is
+    the distinction a change register is actually for.
+    """
+    approved = changes[changes["status"] == "Approved"]
+    pending = changes[changes["status"] == "Pending"]
+    approved_cost = approved["cost_impact"].sum()
+    return {
+        "approved_cost_impact": approved_cost,
+        "approved_schedule_days": int(approved["schedule_impact_days"].sum()),
+        "revised_budget": bac + approved_cost,
+        "pending_count": len(pending),
+        "pending_cost_exposure": pending["cost_impact"].sum(),
+        "pending_schedule_exposure_days": int(pending["schedule_impact_days"].sum()),
+    }
+
+
 def forecast_completion_date(
     milestones: pd.DataFrame, spi: float, project_start: str, planned_finish: str
 ) -> pd.Timestamp:
