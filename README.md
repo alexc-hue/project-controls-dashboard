@@ -10,7 +10,8 @@ controls function would hand to a steering committee.
 Part of a small project-controls toolkit: **project-controls-dashboard** (this repo),
 [schedule-health-analyzer](https://github.com/alexc-hue/schedule-health-analyzer),
 [change-control-register](https://github.com/alexc-hue/change-control-register),
-[risk-trend-tracker](https://github.com/alexc-hue/risk-trend-tracker).
+[risk-trend-tracker](https://github.com/alexc-hue/risk-trend-tracker),
+[project-controls-reporting-engine](https://github.com/alexc-hue/project-controls-reporting-engine).
 
 ![S-curve](assets/s_curve.png)
 
