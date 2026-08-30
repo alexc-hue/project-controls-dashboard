@@ -5,6 +5,11 @@ a risk register, and a change register — into the standard project controls pi
 earned value performance, schedule slippage, risk exposure, and change impact,
 complete with charts and a status report.
 
+Part of a small project-controls toolkit: **project-controls-dashboard** (this repo),
+[schedule-health-analyzer](https://github.com/alexc-hue/schedule-health-analyzer),
+[change-control-register](https://github.com/alexc-hue/change-control-register),
+[risk-trend-tracker](https://github.com/alexc-hue/risk-trend-tracker).
+
 ## Problem
 
 On most projects, "are we on track?" gets answered from a gut feeling or a stale
