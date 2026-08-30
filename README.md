@@ -12,6 +12,8 @@ Part of a small project-controls toolkit: **project-controls-dashboard** (this r
 [change-control-register](https://github.com/alexc-hue/change-control-register),
 [risk-trend-tracker](https://github.com/alexc-hue/risk-trend-tracker).
 
+![S-curve](assets/s_curve.png)
+
 ## Problem
 
 On most projects, "are we on track?" gets answered from a gut feeling or a stale
@@ -28,7 +30,9 @@ would hand to a steering committee.
   dates), a risk register (probability × impact, mitigation owners and due
   dates), and a change register (cost/schedule impact, approval status).
 - Compute standard EVM metrics (SV, CV, SPI, CPI, EAC, ETC, VAC, TCPI) as of the
-  latest reporting period, plus an SPI-adjusted forecast completion date.
+  latest reporting period, plus an SPI-adjusted forecast completion date. The
+  formulas follow the earned value management practice standardized in
+  ANSI/EIA-748, not a custom scoring scheme.
 - Classify each milestone as On Track / At Risk / Delayed from its slip in days,
   and flag risks whose mitigation is overdue.
 - Sum approved changes into a revised budget (BAC plus approved cost impact),
