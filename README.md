@@ -1,9 +1,11 @@
 # Project Controls Dashboard
 
-A Python tool that turns raw project data — a cost/schedule timeseries, a milestone log,
-a risk register, and a change register — into the standard project controls picture:
-earned value performance, schedule slippage, risk exposure, and change impact,
-complete with charts and a status report.
+Operationalizes the standard project controls status cycle, earned value
+performance, schedule slippage, risk exposure, and change impact, as software
+instead of a spreadsheet rebuilt every reporting period. Feed it a
+cost/schedule timeseries, a milestone log, a risk register, and a change
+register, and it produces the same status report and charts a project
+controls function would hand to a steering committee.
 
 Part of a small project-controls toolkit: **project-controls-dashboard** (this repo),
 [schedule-health-analyzer](https://github.com/alexc-hue/schedule-health-analyzer),
@@ -42,10 +44,12 @@ upgrade) that starts on plan and slips from month five onward — chosen
 deliberately so the dashboard has something to actually flag, rather than a
 project with nothing to report.
 
-## Technology
+## Implementation
 
-Python, pandas for the EVM/date calculations, matplotlib for the charts. No
-external services or APIs — everything runs from local CSVs.
+Built in Python so the methodology runs as reproducible code rather than a
+spreadsheet that drifts from version to version: pandas for the EVM/date
+calculations, matplotlib for the charts. No external services or APIs,
+everything runs from local CSVs.
 
 ## Result
 
