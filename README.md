@@ -98,7 +98,7 @@ the cost-performance-adjusted forecast at completion.
 
 ![SPI/CPI trend](assets/spi_cpi_trend.png)
 
-**Milestones** — planned date (black tick) vs. actual/forecast, colored by
+**Milestones** — planned date (ink tick) vs. actual/forecast, colored by
 status.
 
 ![Milestones](assets/milestones.png)
