@@ -147,7 +147,7 @@ def chart_change_register(changes) -> None:
     ax.grid(color=GRID, linewidth=0.6, axis="x")
     _apply_chrome(fig, ax)
     fig.tight_layout()
-    fig.savefig(os.path.join(ASSETS_DIR, "change_register.png"), dpi=140, facecolor=CHART_BG)
+    fig.savefig(os.path.join(ASSETS_DIR, "change_register.png"), dpi=140)
     plt.close(fig)
 
 
@@ -246,7 +246,7 @@ def chart_s_curve(ts, summary, forecast_finish) -> None:
     _apply_chrome(fig, ax)
     fig.autofmt_xdate()
     fig.tight_layout()
-    fig.savefig(os.path.join(ASSETS_DIR, "s_curve.png"), dpi=140, facecolor=CHART_BG)
+    fig.savefig(os.path.join(ASSETS_DIR, "s_curve.png"), dpi=140)
     plt.close(fig)
 
 
@@ -265,7 +265,7 @@ def chart_spi_cpi_trend(ts) -> None:
     _apply_chrome(fig, ax)
     fig.autofmt_xdate()
     fig.tight_layout()
-    fig.savefig(os.path.join(ASSETS_DIR, "spi_cpi_trend.png"), dpi=140, facecolor=CHART_BG)
+    fig.savefig(os.path.join(ASSETS_DIR, "spi_cpi_trend.png"), dpi=140)
     plt.close(fig)
 
 
@@ -288,7 +288,7 @@ def chart_milestones(milestones) -> None:
     _apply_chrome(fig, ax)
     fig.autofmt_xdate()
     fig.tight_layout()
-    fig.savefig(os.path.join(ASSETS_DIR, "milestones.png"), dpi=140, facecolor=CHART_BG)
+    fig.savefig(os.path.join(ASSETS_DIR, "milestones.png"), dpi=140)
     plt.close(fig)
 
 
@@ -311,11 +311,16 @@ def _spread_overlapping_points(risks):
 def chart_risk_matrix(risks) -> None:
     risks = _spread_overlapping_points(risks)
     fig, ax = plt.subplots(figsize=(6.5, 6))
-    open_risks = risks[risks["status"] != "Closed"]
-    closed_risks = risks[risks["status"] == "Closed"]
-    ax.scatter(open_risks["plot_probability"].to_numpy(), open_risks["plot_impact"].to_numpy(),
-               s=(open_risks["exposure"] * 60).to_numpy(), color=STATUS_WARNING, alpha=0.7,
+    open_mask = risks["status"] != "Closed"
+    overdue_risks = risks[open_mask & risks["overdue"]]
+    active_risks = risks[open_mask & ~risks["overdue"]]
+    closed_risks = risks[~open_mask]
+    ax.scatter(active_risks["plot_probability"].to_numpy(), active_risks["plot_impact"].to_numpy(),
+               s=(active_risks["exposure"] * 60).to_numpy(), color=STATUS_WARNING, alpha=0.7,
                edgecolor="white", label="Open / Mitigating")
+    ax.scatter(overdue_risks["plot_probability"].to_numpy(), overdue_risks["plot_impact"].to_numpy(),
+               s=(overdue_risks["exposure"] * 60).to_numpy(), color=STATUS_CRITICAL, alpha=0.7,
+               edgecolor="white", label="Open / Mitigation Overdue")
     ax.scatter(closed_risks["plot_probability"].to_numpy(), closed_risks["plot_impact"].to_numpy(),
                s=(closed_risks["exposure"] * 60).to_numpy(), color=STATUS_GOOD, alpha=0.5,
                edgecolor="white", label="Closed")
@@ -331,7 +336,7 @@ def chart_risk_matrix(risks) -> None:
     ax.grid(color=GRID, linewidth=0.6)
     _apply_chrome(fig, ax)
     fig.tight_layout()
-    fig.savefig(os.path.join(ASSETS_DIR, "risk_matrix.png"), dpi=140, facecolor=CHART_BG)
+    fig.savefig(os.path.join(ASSETS_DIR, "risk_matrix.png"), dpi=140)
     plt.close(fig)
 
 
