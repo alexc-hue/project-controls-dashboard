@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import pandas as pd
 
-from src import metrics
+from src import chart_style, metrics
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
@@ -28,38 +28,14 @@ PROJECT_START = "2026-02-01"
 PLANNED_FINISH = "2027-01-31"
 STATUS_DATE = "2026-10-31"
 
-# Standardized chart color system (chart chrome, status scale, categorical series, baseline)
-CHART_BG = "#fcfcfb"
-INK = "#10182b"
-GRID = "#e1e0d9"
-BASELINE = "#3a4d7a"
-SERIES_1 = "#2a78d6"
-SERIES_2 = "#eb6834"
-SERIES_3 = "#1baf7a"
-STATUS_GOOD = "#0ca30c"
-STATUS_WARNING = "#fab219"
-STATUS_CRITICAL = "#d03b3b"
-
-
-def _apply_chrome(fig, axes) -> None:
-    """Apply the standardized chart chrome (background, ink, gridlines) to a figure."""
-    fig.patch.set_facecolor(CHART_BG)
-    if hasattr(axes, "flatten"):
-        axes = axes.flatten().tolist()
-    elif not isinstance(axes, (list, tuple)):
-        axes = [axes]
-    for ax in axes:
-        ax.set_facecolor(CHART_BG)
-        ax.title.set_color(INK)
-        ax.xaxis.label.set_color(INK)
-        ax.yaxis.label.set_color(INK)
-        ax.tick_params(colors=INK)
-        for spine in ax.spines.values():
-            spine.set_color(INK)
-
 
 def money(x: float) -> str:
-    return f"${x:,.0f}"
+    sign = "-" if x < 0 else ""
+    return f"{sign}${abs(x):,.0f}"
+
+
+def _forecast_str(forecast_finish) -> str:
+    return forecast_finish.date().isoformat() if forecast_finish is not None else "not yet forecastable"
 
 
 def print_summary(summary: dict, forecast_finish) -> None:
@@ -83,7 +59,7 @@ def print_summary(summary: dict, forecast_finish) -> None:
           f"({'over' if summary['vac'] < 0 else 'under'} budget)")
     print(f"To-Complete Perf. Index (TCPI): {summary['tcpi']:.2f}")
     print()
-    print(f"Forecast completion (SPI-adjusted): {forecast_finish.date()} "
+    print(f"Forecast completion (SPI-adjusted): {_forecast_str(forecast_finish)} "
           f"(planned: {PLANNED_FINISH})")
 
 
@@ -135,17 +111,17 @@ def print_changes(changes, change_summary: dict) -> None:
 
 def chart_change_register(changes) -> None:
     ranked = changes.sort_values("cost_impact")
-    colors = [STATUS_GOOD if s == "Approved" else STATUS_WARNING for s in ranked["status"]]
+    colors = [chart_style.STATUS_GOOD if s == "Approved" else chart_style.STATUS_WARNING for s in ranked["status"]]
     fig, ax = plt.subplots(figsize=(9, 5))
     ax.barh(ranked["change_id"] + " - " + ranked["category"], ranked["cost_impact"], color=colors)
-    ax.axvline(0, color=INK, linewidth=0.8, alpha=0.6)
+    ax.axvline(0, color=chart_style.INK, linewidth=0.8, alpha=0.6)
     ax.set_xlabel("Cost impact ($)")
     ax.set_title("Change Register: Cost Impact by Change")
-    handles = [plt.Rectangle((0, 0), 1, 1, color=STATUS_GOOD, label="Approved"),
-               plt.Rectangle((0, 0), 1, 1, color=STATUS_WARNING, label="Pending")]
+    handles = [plt.Rectangle((0, 0), 1, 1, color=chart_style.STATUS_GOOD, label="Approved"),
+               plt.Rectangle((0, 0), 1, 1, color=chart_style.STATUS_WARNING, label="Pending")]
     ax.legend(handles=handles, loc="lower right", fontsize=8)
-    ax.grid(color=GRID, linewidth=0.6, axis="x")
-    _apply_chrome(fig, ax)
+    ax.grid(color=chart_style.GRID, linewidth=0.6, axis="x")
+    chart_style.apply_chrome(fig, ax)
     fig.tight_layout()
     fig.savefig(os.path.join(ASSETS_DIR, "change_register.png"), dpi=140)
     plt.close(fig)
@@ -174,7 +150,7 @@ def write_report_markdown(summary: dict, forecast_finish, milestones, risks, cha
         f"({'over' if summary['vac'] < 0 else 'under'} budget) |",
         f"| To-Complete Performance Index (TCPI) | {summary['tcpi']:.2f} |",
         "",
-        f"**Forecast completion (SPI-adjusted):** {forecast_finish.date()} "
+        f"**Forecast completion (SPI-adjusted):** {_forecast_str(forecast_finish)} "
         f"(planned: {PLANNED_FINISH})",
         "",
         "## Milestones",
@@ -230,20 +206,21 @@ def write_report_markdown(summary: dict, forecast_finish, milestones, risks, cha
 def chart_s_curve(ts, summary, forecast_finish) -> None:
     fig, ax = plt.subplots(figsize=(9, 5.5))
     ax.plot(ts["period_label"].to_numpy(), ts["planned_value_cum"].to_numpy(),
-            label="Planned Value (PV)", color=SERIES_1, linewidth=2)
+            label="Planned Value (PV)", color=chart_style.SERIES_1, linewidth=2)
     actuals = metrics.actuals_only(ts)
     ax.plot(actuals["period_label"].to_numpy(), actuals["earned_value_cum"].to_numpy(),
-            label="Earned Value (EV)", color=SERIES_2, linewidth=2, marker="o", markersize=4)
+            label="Earned Value (EV)", color=chart_style.SERIES_2, linewidth=2, marker="o", markersize=4)
     ax.plot(actuals["period_label"].to_numpy(), actuals["actual_cost_cum"].to_numpy(),
-            label="Actual Cost (AC)", color=SERIES_3, linewidth=2, marker="o", markersize=4)
-    ax.scatter([forecast_finish], [BAC], color=SERIES_3, marker="x", s=80,
-               label=f"Forecast completion cost (EAC {money(summary['eac'])})", zorder=5)
+            label="Actual Cost (AC)", color=chart_style.SERIES_3, linewidth=2, marker="o", markersize=4)
+    if forecast_finish is not None:
+        ax.scatter([forecast_finish], [BAC], color=chart_style.SERIES_3, marker="x", s=80,
+                   label=f"Forecast completion cost (EAC {money(summary['eac'])})", zorder=5)
     ax.set_title("Cost & Schedule Performance (S-Curve)")
     ax.set_ylabel("Cumulative value ($)")
     ax.yaxis.set_major_formatter(mticker.FuncFormatter(lambda x, _: f"${x/1000:.0f}k"))
     ax.legend(loc="upper left", fontsize=8)
-    ax.grid(color=GRID, linewidth=0.6)
-    _apply_chrome(fig, ax)
+    ax.grid(color=chart_style.GRID, linewidth=0.6)
+    chart_style.apply_chrome(fig, ax)
     fig.autofmt_xdate()
     fig.tight_layout()
     fig.savefig(os.path.join(ASSETS_DIR, "s_curve.png"), dpi=140)
@@ -254,15 +231,15 @@ def chart_spi_cpi_trend(ts) -> None:
     scored = metrics.add_performance_indices(metrics.actuals_only(ts))
     fig, ax = plt.subplots(figsize=(9, 4.5))
     ax.plot(scored["period_label"].to_numpy(), scored["spi"].to_numpy(), label="SPI",
-            color=SERIES_1, linewidth=2, marker="o")
+            color=chart_style.SERIES_1, linewidth=2, marker="o")
     ax.plot(scored["period_label"].to_numpy(), scored["cpi"].to_numpy(), label="CPI",
-            color=SERIES_2, linewidth=2, marker="o")
-    ax.axhline(1.0, color=BASELINE, linestyle="--", linewidth=1)
+            color=chart_style.SERIES_2, linewidth=2, marker="o")
+    ax.axhline(1.0, color=chart_style.BASELINE, linestyle="--", linewidth=1)
     ax.set_title("SPI / CPI Trend")
     ax.set_ylabel("Index (1.0 = on plan)")
     ax.legend(fontsize=8)
-    ax.grid(color=GRID, linewidth=0.6)
-    _apply_chrome(fig, ax)
+    ax.grid(color=chart_style.GRID, linewidth=0.6)
+    chart_style.apply_chrome(fig, ax)
     fig.autofmt_xdate()
     fig.tight_layout()
     fig.savefig(os.path.join(ASSETS_DIR, "spi_cpi_trend.png"), dpi=140)
@@ -270,22 +247,22 @@ def chart_spi_cpi_trend(ts) -> None:
 
 
 def chart_milestones(milestones) -> None:
-    colors = {"On Track": STATUS_GOOD, "At Risk": STATUS_WARNING, "Delayed": STATUS_CRITICAL}
+    colors = {"On Track": chart_style.STATUS_GOOD, "At Risk": chart_style.STATUS_WARNING,
+              "Delayed": chart_style.STATUS_CRITICAL}
     fig, ax = plt.subplots(figsize=(9, 5))
-    y = range(len(milestones))
-    for i, row in milestones.iterrows():
-        xs = pd.to_datetime([row["planned_date"], row["current_date"]]).to_numpy()
-        ax.plot(xs, [i, i], color=colors[row["milestone_status"]], linewidth=3,
+    for i, row in enumerate(milestones.itertuples()):
+        xs = pd.to_datetime([row.planned_date, row.current_date]).to_numpy()
+        ax.plot(xs, [i, i], color=colors[row.milestone_status], linewidth=3,
                 solid_capstyle="round")
-        ax.scatter(row["planned_date"], i, color=INK, marker="|", s=100, zorder=3)
-    ax.set_yticks(list(y))
+        ax.scatter(row.planned_date, i, color=chart_style.INK, marker="|", s=100, zorder=3)
+    ax.set_yticks(range(len(milestones)))
     ax.set_yticklabels(milestones["milestone"], fontsize=8)
     ax.invert_yaxis()
     ax.set_title("Milestones: Planned vs Actual/Forecast (ink tick = planned date)")
     handles = [plt.Line2D([0], [0], color=c, linewidth=3, label=s) for s, c in colors.items()]
     ax.legend(handles=handles, loc="lower right", fontsize=8)
-    ax.grid(color=GRID, linewidth=0.6, axis="x")
-    _apply_chrome(fig, ax)
+    ax.grid(color=chart_style.GRID, linewidth=0.6, axis="x")
+    chart_style.apply_chrome(fig, ax)
     fig.autofmt_xdate()
     fig.tight_layout()
     fig.savefig(os.path.join(ASSETS_DIR, "milestones.png"), dpi=140)
@@ -316,13 +293,13 @@ def chart_risk_matrix(risks) -> None:
     active_risks = risks[open_mask & ~risks["overdue"]]
     closed_risks = risks[~open_mask]
     ax.scatter(active_risks["plot_probability"].to_numpy(), active_risks["plot_impact"].to_numpy(),
-               s=(active_risks["exposure"] * 60).to_numpy(), color=STATUS_WARNING, alpha=0.7,
+               s=(active_risks["exposure"] * 60).to_numpy(), color=chart_style.STATUS_WARNING, alpha=0.7,
                edgecolor="white", label="Open / Mitigating")
     ax.scatter(overdue_risks["plot_probability"].to_numpy(), overdue_risks["plot_impact"].to_numpy(),
-               s=(overdue_risks["exposure"] * 60).to_numpy(), color=STATUS_CRITICAL, alpha=0.7,
+               s=(overdue_risks["exposure"] * 60).to_numpy(), color=chart_style.STATUS_CRITICAL, alpha=0.7,
                edgecolor="white", label="Open / Mitigation Overdue")
     ax.scatter(closed_risks["plot_probability"].to_numpy(), closed_risks["plot_impact"].to_numpy(),
-               s=(closed_risks["exposure"] * 60).to_numpy(), color=STATUS_GOOD, alpha=0.5,
+               s=(closed_risks["exposure"] * 60).to_numpy(), color=chart_style.STATUS_GOOD, alpha=0.5,
                edgecolor="white", label="Closed")
     for _, row in risks.iterrows():
         ax.annotate(row["risk_id"], (row["plot_probability"], row["plot_impact"]),
@@ -333,8 +310,8 @@ def chart_risk_matrix(risks) -> None:
     ax.set_ylabel("Impact (1-5)")
     ax.set_title("Risk Matrix (bubble size = exposure)")
     ax.legend(loc="upper left", fontsize=8)
-    ax.grid(color=GRID, linewidth=0.6)
-    _apply_chrome(fig, ax)
+    ax.grid(color=chart_style.GRID, linewidth=0.6)
+    chart_style.apply_chrome(fig, ax)
     fig.tight_layout()
     fig.savefig(os.path.join(ASSETS_DIR, "risk_matrix.png"), dpi=140)
     plt.close(fig)
@@ -349,9 +326,7 @@ def main() -> None:
     changes = metrics.load_change_register(os.path.join(DATA_DIR, "change_register.csv"))
 
     summary = metrics.project_summary(ts, BAC)
-    forecast_finish = metrics.forecast_completion_date(
-        milestones, summary["spi"], PROJECT_START, PLANNED_FINISH
-    )
+    forecast_finish = metrics.forecast_completion_date(summary["spi"], PROJECT_START, PLANNED_FINISH)
     change_summary = metrics.change_impact_summary(changes, BAC)
 
     print_summary(summary, forecast_finish)

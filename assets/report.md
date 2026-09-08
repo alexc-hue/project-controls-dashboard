@@ -9,16 +9,16 @@
 | Planned Value (PV) | $1,050,000 |
 | Earned Value (EV) | $930,000 |
 | Actual Cost (AC) | $1,080,000 |
-| Schedule Variance (SV) | $-120,000 (-11.4%) |
-| Cost Variance (CV) | $-150,000 (-16.1%) |
+| Schedule Variance (SV) | -$120,000 (-11.4%) |
+| Cost Variance (CV) | -$150,000 (-16.1%) |
 | SPI | 0.89 |
 | CPI | 0.86 |
 | Estimate at Completion (EAC) | $1,393,548 |
 | Estimate to Complete (ETC) | $313,548 |
-| Variance at Completion (VAC) | $-193,548 (over budget) |
+| Variance at Completion (VAC) | -$193,548 (over budget) |
 | To-Complete Performance Index (TCPI) | 2.25 |
 
-**Forecast completion (SPI-adjusted):** 2027-03-19 (planned: 2027-01-31)
+**Forecast completion (SPI-adjusted):** 2027-03-18 (planned: 2027-01-31)
 
 ## Milestones
 
@@ -58,7 +58,7 @@
 | CH05 | $15,000 | +4d | Client Request | Pending | Extended commissioning support requested by client operations team |
 | CH06 | $9,000 | +2d | Design | Approved | Additional cable tray due to updated cable schedule |
 | CH08 | $6,000 | +0d | Client Request | Approved | Upgrade SCADA historian license tier for extended data retention |
-| CH04 | $-22,000 | +0d | Scope | Approved | Scope reduction: remove redundant spare feeder bay |
+| CH04 | -$22,000 | +0d | Scope | Approved | Scope reduction: remove redundant spare feeder bay |
 
 **Approved changes:** $88,000 (+25 days)  
 **Revised budget (BAC + approved changes):** $1,288,000  
