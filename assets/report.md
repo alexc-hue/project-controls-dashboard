@@ -18,7 +18,7 @@
 | Variance at Completion (VAC) | -$193,548 (over budget) |
 | To-Complete Performance Index (TCPI) | 2.25 |
 
-**Forecast completion (SPI-adjusted):** 2027-03-18 (planned: 2027-01-31)
+**Forecast completion (SPI-adjusted):** 2027-03-19 (planned: 2027-01-31)
 
 ## Milestones
 

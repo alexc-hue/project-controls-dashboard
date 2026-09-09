@@ -19,6 +19,7 @@ import matplotlib.ticker as mticker
 import pandas as pd
 
 from src import chart_style, metrics
+from src.formatting import money
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
@@ -27,11 +28,6 @@ BAC = 1_200_000  # Budget at Completion
 PROJECT_START = "2026-02-01"
 PLANNED_FINISH = "2027-01-31"
 STATUS_DATE = "2026-10-31"
-
-
-def money(x: float) -> str:
-    sign = "-" if x < 0 else ""
-    return f"{sign}${abs(x):,.0f}"
 
 
 def _forecast_str(forecast_finish) -> str:
