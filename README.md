@@ -68,14 +68,14 @@ Planned Value (PV):         $1,050,000
 Earned Value (EV):          $930,000
 Actual Cost (AC):           $1,080,000
 
-Schedule Variance (SV):     $-120,000  (-11.4%)
-Cost Variance (CV):         $-150,000  (-16.1%)
+Schedule Variance (SV):     -$120,000  (-11.4%)
+Cost Variance (CV):         -$150,000  (-16.1%)
 SPI (schedule performance): 0.89
 CPI (cost performance):     0.86
 
 Estimate at Completion (EAC):  $1,393,548
 Estimate to Complete (ETC):    $313,548
-Variance at Completion (VAC):  $-193,548  (over budget)
+Variance at Completion (VAC):  -$193,548  (over budget)
 To-Complete Perf. Index (TCPI): 2.25
 
 Forecast completion (SPI-adjusted): 2027-03-19 (planned: 2027-01-31)
