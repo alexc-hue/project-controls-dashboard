@@ -1,5 +1,7 @@
 # Project Controls Dashboard
 
+![CI](https://github.com/alexc-hue/project-controls-dashboard/actions/workflows/tests.yml/badge.svg)
+
 Operationalizes the standard project controls status cycle, earned value
 performance, schedule slippage, risk exposure, and change impact, as software
 instead of a spreadsheet rebuilt every reporting period. Feed it a
