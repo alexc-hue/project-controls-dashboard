@@ -24,6 +24,11 @@ from src.formatting import money
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
+# Edit these to match your own project -- see README ("point this at your
+# own data"). They aren't read from the CSVs: BAC/PROJECT_START/
+# PLANNED_FINISH/STATUS_DATE are this fictional project's assumptions, and
+# swapping in your own CSVs without also updating these will compute a real
+# schedule/cost against the wrong budget, dates, and status cutoff.
 BAC = 1_200_000  # Budget at Completion
 PROJECT_START = "2026-02-01"
 PLANNED_FINISH = "2027-01-31"
@@ -32,6 +37,25 @@ STATUS_DATE = "2026-10-31"
 
 def _forecast_str(forecast_finish) -> str:
     return forecast_finish.date().isoformat() if forecast_finish is not None else "not yet forecastable"
+
+
+def _slip_str(slip_days) -> str:
+    """Format a milestone's slip in days, or 'n/a' if the date data was incomplete
+    (slip_days is NaN -- see metrics.load_milestones' "Date Missing" status)."""
+    return f"{int(slip_days):+d}d" if pd.notna(slip_days) else "n/a"
+
+
+def _escape_md_cell(value) -> str:
+    """Escape/normalize a free-text value so it can't corrupt a markdown table.
+
+    A raw `|` splits into extra columns, a backslash can escape the delimiter
+    that follows it, and embedded newlines break the row onto multiple lines.
+    """
+    if value is None or value != value:  # covers None and NaN (NaN != NaN)
+        return ""
+    text = str(value)
+    text = text.replace("\\", "\\\\").replace("|", "\\|")
+    return text.replace("\r\n", " ").replace("\n", " ").replace("\r", " ")
 
 
 def print_summary(summary: dict, forecast_finish) -> None:
@@ -68,7 +92,7 @@ def print_milestones(milestones) -> None:
         tag = "actual" if row["date_type"] == "Actual" else "forecast"
         print(f"[{row['milestone_status']:>8}] {row['milestone']:<34} "
               f"planned {row['planned_date'].date()}  {tag} {row['current_date'].date()} "
-              f"({row['slip_days']:+d}d)")
+              f"({_slip_str(row['slip_days'])})")
 
 
 def print_risks(risks) -> None:
@@ -157,8 +181,8 @@ def write_report_markdown(summary: dict, forecast_finish, milestones, risks, cha
     for _, row in milestones.iterrows():
         tag = "actual" if row["date_type"] == "Actual" else "forecast"
         lines.append(
-            f"| {row['milestone_status']} | {row['milestone']} | {row['planned_date'].date()} "
-            f"| {row['current_date'].date()} ({tag}) | {row['slip_days']:+d}d |"
+            f"| {row['milestone_status']} | {_escape_md_cell(row['milestone'])} | {row['planned_date'].date()} "
+            f"| {row['current_date'].date()} ({tag}) | {_slip_str(row['slip_days'])} |"
         )
 
     lines += ["", "## Top Risks by Exposure (probability x impact)", "",
@@ -167,8 +191,8 @@ def write_report_markdown(summary: dict, forecast_finish, milestones, risks, cha
     for _, row in risks.head(5).iterrows():
         overdue_flag = "Yes" if row["overdue"] else ""
         lines.append(
-            f"| {row['risk_id']} | {row['category']} | {row['exposure']} "
-            f"| {row['description']} | {overdue_flag} |"
+            f"| {row['risk_id']} | {_escape_md_cell(row['category'])} | {row['exposure']} "
+            f"| {_escape_md_cell(row['description'])} | {overdue_flag} |"
         )
 
     overdue_count = int(risks["overdue"].sum())
@@ -181,8 +205,8 @@ def write_report_markdown(summary: dict, forecast_finish, milestones, risks, cha
     for _, row in changes.iterrows():
         lines.append(
             f"| {row['change_id']} | {money(row['cost_impact'])} "
-            f"| {row['schedule_impact_days']:+d}d | {row['category']} | {row['status']} "
-            f"| {row['description']} |"
+            f"| {row['schedule_impact_days']:+d}d | {_escape_md_cell(row['category'])} | {row['status']} "
+            f"| {_escape_md_cell(row['description'])} |"
         )
     lines += [
         "",
@@ -248,7 +272,10 @@ def chart_milestones(milestones) -> None:
     fig, ax = plt.subplots(figsize=(9, 5))
     for i, row in enumerate(milestones.itertuples()):
         xs = pd.to_datetime([row.planned_date, row.current_date]).to_numpy()
-        ax.plot(xs, [i, i], color=colors[row.milestone_status], linewidth=3,
+        # .get() with a neutral fallback: a "Date Missing" row (see
+        # metrics.load_milestones) has no entry in this 3-color status scale,
+        # since it isn't a severity reading at all -- it's a data-quality gap.
+        ax.plot(xs, [i, i], color=colors.get(row.milestone_status, chart_style.INK), linewidth=3,
                 solid_capstyle="round")
         ax.scatter(row.planned_date, i, color=chart_style.INK, marker="|", s=100, zorder=3)
     ax.set_yticks(range(len(milestones)))

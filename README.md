@@ -144,4 +144,7 @@ python dashboard.py
 
 Swap in your own `data/cost_schedule_timeseries.csv`, `data/milestones.csv`,
 `data/risk_register.csv`, and `data/change_register.csv` (same columns) to
-point it at a real project.
+point it at a real project. The `BAC`/`PROJECT_START`/`PLANNED_FINISH`/
+`STATUS_DATE` constants near the top of `dashboard.py` are this fictional
+project's assumptions too, not read from the CSVs, so update those by hand
+as well.
