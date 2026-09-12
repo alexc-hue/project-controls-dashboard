@@ -1,6 +1,6 @@
 # Project Controls Dashboard
 
-![CI](https://github.com/alexc-hue/project-controls-dashboard/actions/workflows/tests.yml/badge.svg)
+![CI](https://github.com/alexc-hue/project-controls-dashboard/actions/workflows/tests.yml/badge.svg) [![codecov](https://codecov.io/gh/alexc-hue/project-controls-dashboard/graph/badge.svg)](https://codecov.io/gh/alexc-hue/project-controls-dashboard) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE) ![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 
 Operationalizes the standard project controls status cycle, earned value
 performance, schedule slippage, risk exposure, and change impact, as software
