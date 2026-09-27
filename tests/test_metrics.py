@@ -11,7 +11,11 @@ import math
 import pandas as pd
 import pytest
 
-from src.metrics import add_performance_indices, forecast_completion_date, project_summary
+from src.metrics import (
+    add_performance_indices,
+    forecast_completion_date,
+    project_summary,
+)
 
 
 def _timeseries(pv, ev, ac):
