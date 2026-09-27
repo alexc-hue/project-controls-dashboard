@@ -83,6 +83,8 @@ To-Complete Perf. Index (TCPI): 2.25
 Forecast completion (SPI-adjusted): 2027-03-19 (planned: 2027-01-31)
 ```
 
+This block is checked in CI against what the script actually prints (see `tests/test_readme_result.py`), so it can't quietly fall out of date.
+
 Plus a milestone list with slip-in-days, and the top risks ranked by exposure
 with overdue mitigations flagged.
 
