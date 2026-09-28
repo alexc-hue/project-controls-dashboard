@@ -152,3 +152,8 @@ point it at a real project. The `BAC`/`PROJECT_START`/`PLANNED_FINISH`/
 `STATUS_DATE` constants near the top of `dashboard.py` are this fictional
 project's assumptions too, not read from the CSVs, so update those by hand
 as well.
+
+To see how it copes with bigger generated risk and change registers, run
+`python benchmarks/size_test.py`. It prints run time and peak memory at each
+size. It's a hand-run check, not part of the test suite; measured numbers
+are under Limitations.
