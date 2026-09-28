@@ -138,6 +138,13 @@ all, so the dashboard is only as convincing as the scenario behind it.
   the consequences of those decisions, it doesn't make them.
 - No workflow/approval-chain modeling beyond a final status field, and no
   multi-currency or multi-contract-type handling.
+- Size-tested with `benchmarks/size_test.py` on a 2018 laptop (Intel
+  i7-8750H, Python 3.14), single runs, so treat the numbers as a guide: risk
+  and change registers of 1,000 entries each run end to end in about 4
+  seconds, 10,000 each in about 7 and 100,000 each in under 40. The change
+  and milestone charts show at most 30 items and the risk matrix labels the
+  30 highest-exposure risks; the console report and report.md list
+  everything.
 
 ## Run it
 
