@@ -334,18 +334,30 @@ def chart_milestones(milestones) -> None:
 
 
 def _spread_overlapping_points(risks):
-    """Nudge risks that share the same (probability, impact) cell so labels don't overlap."""
+    """Nudge risks that share the same (probability, impact) cell so labels don't overlap.
+
+    Each risk in a shared cell moves 0.22 along its own angle around the cell
+    centre (j-th of n risks at 2*pi*j/n). Computed in one pass over the rows;
+    math.cos/sin per value keeps the positions exactly as before.
+    """
     risks = risks.copy()
     risks["plot_probability"] = risks["probability"].astype(float)
     risks["plot_impact"] = risks["impact"].astype(float)
-    for _, idx in risks.groupby(["probability", "impact"]).groups.items():
-        idx = list(idx)
-        if len(idx) <= 1:
+    cells = risks.groupby(["probability", "impact"])
+    position = cells.cumcount().to_numpy()
+    cell_size = cells["probability"].transform("size").to_numpy()
+    dx, dy = [], []
+    for j, n in zip(position, cell_size):
+        if n <= 1:
+            dx.append(0.0)
+            dy.append(0.0)
             continue
-        for j, i in enumerate(idx):
-            angle = 2 * math.pi * j / len(idx)
-            risks.loc[i, "plot_probability"] += 0.22 * math.cos(angle)
-            risks.loc[i, "plot_impact"] += 0.22 * math.sin(angle)
+        angle = 2 * math.pi * j / n
+        dx.append(0.22 * math.cos(angle))
+        dy.append(0.22 * math.sin(angle))
+    shared = cell_size > 1
+    risks.loc[shared, "plot_probability"] += [d for d, s in zip(dx, shared) if s]
+    risks.loc[shared, "plot_impact"] += [d for d, s in zip(dy, shared) if s]
     return risks
 
 
