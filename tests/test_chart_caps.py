@@ -25,3 +25,12 @@ def test_small_registers_are_charted_in_full():
     small = pd.DataFrame({"cost_impact": [1, -2], "exposure": [3, 4]})
     assert dashboard._largest_changes(small).equals(small)
     assert dashboard._labelled_risks(small).equals(small)
+
+
+def test_milestone_chart_keeps_the_most_slipped_in_order():
+    milestones = pd.DataFrame({"milestone": [f"M{i}" for i in range(60)],
+                               "slip_days": [float(i) if i % 7 else float("nan") for i in range(60)]})
+    shown = dashboard._charted_milestones(milestones)
+    assert len(shown) == dashboard.CHART_TOP_N
+    assert shown["slip_days"].notna().all()
+    assert list(shown.index) == sorted(shown.index)

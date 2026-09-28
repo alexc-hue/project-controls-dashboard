@@ -293,7 +293,18 @@ def chart_spi_cpi_trend(ts) -> None:
     plt.close(fig)
 
 
+def _charted_milestones(milestones):
+    """All milestones up to CHART_TOP_N; beyond that the CHART_TOP_N that
+    slipped most, kept in their usual order."""
+    if len(milestones) <= CHART_TOP_N:
+        return milestones
+    keep = milestones["slip_days"].sort_values(ascending=False, kind="stable", na_position="last").index[:CHART_TOP_N]
+    return milestones.loc[milestones.index.isin(keep)]
+
+
 def chart_milestones(milestones) -> None:
+    total = len(milestones)
+    milestones = _charted_milestones(milestones)
     colors = {"On Track": chart_style.STATUS_GOOD, "At Risk": chart_style.STATUS_WARNING,
               "Delayed": chart_style.STATUS_CRITICAL}
     fig, ax = plt.subplots(figsize=(9, 5))
@@ -308,7 +319,10 @@ def chart_milestones(milestones) -> None:
     ax.set_yticks(range(len(milestones)))
     ax.set_yticklabels(milestones["milestone"], fontsize=8)
     ax.invert_yaxis()
-    ax.set_title("Milestones: Planned vs Actual/Forecast (ink tick = planned date)")
+    title = "Milestones: Planned vs Actual/Forecast (ink tick = planned date)"
+    if len(milestones) < total:
+        title += f" ({len(milestones)} most slipped of {total})"
+    ax.set_title(title)
     handles = [plt.Line2D([0], [0], color=c, linewidth=3, label=s) for s, c in colors.items()]
     ax.legend(handles=handles, loc="lower right", fontsize=8)
     ax.grid(color=chart_style.GRID, linewidth=0.6, axis="x")
