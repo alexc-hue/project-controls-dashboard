@@ -129,14 +129,41 @@ def print_changes(changes, change_summary: dict) -> None:
           f"{change_summary['pending_schedule_exposure_days']:+d} days exposure")
 
 
+# Per-item charts show at most this many changes or risk labels. Past a few
+# dozen, labels overlap and drawing thousands of them is what made large
+# registers slow. Every item is still listed in the console report and
+# assets/report.md.
+CHART_TOP_N = 30
+
+
+def _largest_changes(changes):
+    """The CHART_TOP_N changes with the largest cost impact either way."""
+    if len(changes) <= CHART_TOP_N:
+        return changes
+    keep = changes["cost_impact"].abs().sort_values(ascending=False, kind="stable").index[:CHART_TOP_N]
+    return changes.loc[changes.index.isin(keep)]
+
+
+def _labelled_risks(risks):
+    """The risks that get an ID label on the matrix: all of them, or the
+    CHART_TOP_N with the highest exposure."""
+    if len(risks) <= CHART_TOP_N:
+        return risks
+    keep = risks["exposure"].sort_values(ascending=False, kind="stable").index[:CHART_TOP_N]
+    return risks.loc[risks.index.isin(keep)]
+
+
 def chart_change_register(changes) -> None:
-    ranked = changes.sort_values("cost_impact")
+    ranked = _largest_changes(changes).sort_values("cost_impact")
     colors = [chart_style.STATUS_GOOD if s == "Approved" else chart_style.STATUS_WARNING for s in ranked["status"]]
     fig, ax = plt.subplots(figsize=(9, 5))
     ax.barh(ranked["change_id"] + " - " + ranked["category"], ranked["cost_impact"], color=colors)
     ax.axvline(0, color=chart_style.INK, linewidth=0.8, alpha=0.6)
     ax.set_xlabel("Cost impact ($)")
-    ax.set_title("Change Register: Cost Impact by Change")
+    title = "Change Register: Cost Impact by Change"
+    if len(ranked) < len(changes):
+        title += f" ({len(ranked)} largest of {len(changes)})"
+    ax.set_title(title)
     handles = [plt.Rectangle((0, 0), 1, 1, color=chart_style.STATUS_GOOD, label="Approved"),
                plt.Rectangle((0, 0), 1, 1, color=chart_style.STATUS_WARNING, label="Pending")]
     ax.legend(handles=handles, loc="lower right", fontsize=8)
@@ -324,14 +351,17 @@ def chart_risk_matrix(risks) -> None:
     ax.scatter(closed_risks["plot_probability"].to_numpy(), closed_risks["plot_impact"].to_numpy(),
                s=(closed_risks["exposure"] * 60).to_numpy(), color=chart_style.STATUS_GOOD, alpha=0.5,
                edgecolor="white", label="Closed")
-    for _, row in risks.iterrows():
-        ax.annotate(row["risk_id"], (row["plot_probability"], row["plot_impact"]),
-                    fontsize=7, ha="center", va="center", color="white", weight="bold")
+    labelled = _labelled_risks(risks)
+    for risk_id, x, y in zip(labelled["risk_id"], labelled["plot_probability"], labelled["plot_impact"]):
+        ax.annotate(risk_id, (x, y), fontsize=7, ha="center", va="center", color="white", weight="bold")
     ax.set_xlim(0.5, 5.5)
     ax.set_ylim(0.5, 5.5)
     ax.set_xlabel("Probability (1-5)")
     ax.set_ylabel("Impact (1-5)")
-    ax.set_title("Risk Matrix (bubble size = exposure)")
+    title = "Risk Matrix (bubble size = exposure)"
+    if len(labelled) < len(risks):
+        title += f" (labels: {len(labelled)} highest exposure of {len(risks)})"
+    ax.set_title(title)
     ax.legend(loc="upper left", fontsize=8)
     ax.grid(color=chart_style.GRID, linewidth=0.6)
     chart_style.apply_chrome(fig, ax)
