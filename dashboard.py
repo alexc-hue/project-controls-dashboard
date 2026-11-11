@@ -60,7 +60,7 @@ def _escape_md_cell(value) -> str:
 
 def print_summary(summary: dict, forecast_finish) -> None:
     print("=" * 60)
-    print(f"PROJECT STATUS REPORT — as of {summary['status_period']}")
+    print(f"PROJECT STATUS REPORT, as of {summary['status_period']}")
     print("=" * 60)
     print(f"Percent complete (earned):  {summary['percent_complete']:.1f}%")
     print()
@@ -176,7 +176,7 @@ def chart_change_register(changes) -> None:
 
 def write_report_markdown(summary: dict, forecast_finish, milestones, risks, changes, change_summary: dict) -> None:
     lines = [
-        f"# Project Status Report — as of {summary['status_period']}",
+        f"# Project Status Report, as of {summary['status_period']}",
         "",
         f"**Percent complete (earned):** {summary['percent_complete']:.1f}%",
         "",

@@ -1,4 +1,4 @@
-# Project Status Report — as of 2026-10
+# Project Status Report, as of 2026-10
 
 **Percent complete (earned):** 77.5%
 

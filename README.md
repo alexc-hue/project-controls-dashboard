@@ -9,11 +9,17 @@ cost/schedule timeseries, a milestone log, a risk register, and a change
 register, and it produces the same status report and charts a project
 controls function would hand to a steering committee.
 
-Part of a small project-controls toolkit: **project-controls-dashboard** (this repo),
+The project-controls toolkit is six tools:
+**project-controls-dashboard** (this repo),
 [schedule-health-analyzer](https://github.com/alexc-hue/schedule-health-analyzer),
 [change-control-register](https://github.com/alexc-hue/change-control-register),
 [risk-trend-tracker](https://github.com/alexc-hue/risk-trend-tracker),
-[project-controls-reporting-engine](https://github.com/alexc-hue/project-controls-reporting-engine).
+[project-controls-reporting-engine](https://github.com/alexc-hue/project-controls-reporting-engine),
+[recovery-scenario-planner](https://github.com/alexc-hue/recovery-scenario-planner).
+Two separate practice models apply the same methods to data center
+delivery, on synthetic data:
+[commissioning-readiness-gate](https://github.com/alexc-hue/commissioning-readiness-gate),
+[facility-status-digital-twin](https://github.com/alexc-hue/facility-status-digital-twin).
 
 ![S-curve](assets/s_curve.png)
 
@@ -47,7 +53,7 @@ would hand to a steering committee.
   weekly report would use.
 
 The sample data is a fictional 12-month infrastructure project (substation
-upgrade) that starts on plan and slips from month five onward — chosen
+upgrade) that starts on plan and slips from month five onward, chosen
 deliberately so the dashboard has something to actually flag, rather than a
 project with nothing to report.
 
@@ -62,7 +68,7 @@ everything runs from local CSVs.
 
 ```
 ============================================================
-PROJECT STATUS REPORT — as of 2026-10
+PROJECT STATUS REPORT, as of 2026-10
 ============================================================
 Percent complete (earned):  77.5%
 
@@ -93,32 +99,32 @@ A saved copy of this report is generated alongside the charts: see
 
 ## Screenshots
 
-**Cost & schedule performance (S-curve)** — planned vs. earned vs. actual, with
+**Cost & schedule performance (S-curve):** planned vs. earned vs. actual, with
 the cost-performance-adjusted forecast at completion.
 
 ![S-curve](assets/s_curve.png)
 
-**SPI/CPI trend** — cost and schedule performance index by reporting period.
+**SPI/CPI trend:** cost and schedule performance index by reporting period.
 
 ![SPI/CPI trend](assets/spi_cpi_trend.png)
 
-**Milestones** — planned date (ink tick) vs. actual/forecast, colored by
+**Milestones:** planned date (ink tick) vs. actual/forecast, colored by
 status.
 
 ![Milestones](assets/milestones.png)
 
-**Risk matrix** — probability × impact, bubble size = exposure.
+**Risk matrix:** probability × impact, bubble size = exposure.
 
 ![Risk matrix](assets/risk_matrix.png)
 
-**Change register** — cost impact by change, approved vs. pending.
+**Change register:** cost impact by change, approved vs. pending.
 
 ![Change register](assets/change_register.png)
 
 ## What I learned
 
 Framing this as "what would I actually hand to a steering committee" rather
-than "what's a cool chart to build" is what kept the scope in check — four
+than "what's a cool chart to build" is what kept the scope in check: four
 charts and one status report cover the questions a sponsor actually asks
 (are we late, are we over budget, what's driving it, what's still open), and
 anything past that would have been decoration rather than signal. The other
