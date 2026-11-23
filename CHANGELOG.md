@@ -4,6 +4,31 @@ All notable changes to this project are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and version numbers
 follow [Semantic Versioning](https://semver.org/).
 
+## [1.2.2] - 2026-11-23
+
+Bug-fix release. The console report, `assets/report.md` and the charts are unchanged on the sample
+data.
+
+### Fixed
+
+- EVM guards in `project_summary`, matching the module's NaN-not-inf rule: a CPI of 0 (EV 0 with AC
+  above 0) gives NaN for EAC, ETC and VAC instead of inf and -inf; a BAC of 0 gives NaN percent
+  complete instead of inf and a RuntimeWarning; and once AC reaches BAC, TCPI is NaN instead of a
+  negative number that read as an easy target.
+- Status matching ignores case and surrounding whitespace. A " closed" risk used to count as open
+  and could be flagged as overdue, and an "approved" or "pending" change dropped out of the change
+  totals. `load_risk_register` and `load_change_register` now write the known statuses (Open,
+  Mitigating, Closed, Approved, Pending, Rejected) in their usual form; any other status is only
+  trimmed.
+- `money()` printed a small negative amount such as -0.4 as `-$0`. It now prints `$0`.
+- The `forecast_completion_date` docstring said it stretches the remaining planned duration. It
+  stretches the whole planned duration from project start (planned duration / SPI), which is what
+  the code has always done.
+
+### Added
+
+- Tests for each fix above.
+
 ## [1.2.1] - 2026-11-12
 
 Maintenance release. The only output change is the report headline's punctuation.
@@ -62,6 +87,7 @@ Checks and tests only. The tool's output is unchanged.
 
 First tagged release, marking the state of the repo before this changelog started. Earned value (SPI/CPI, EAC/ETC/VAC, TCPI), an SPI-based forecast finish, milestone tracking and risk register analysis, with charts and a markdown report. Includes the fixes from code review, a pytest suite and CI.
 
+[1.2.2]: https://github.com/alexc-hue/project-controls-dashboard/compare/v1.2.1...v1.2.2
 [1.2.1]: https://github.com/alexc-hue/project-controls-dashboard/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/alexc-hue/project-controls-dashboard/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/alexc-hue/project-controls-dashboard/compare/v1.0.0...v1.1.0

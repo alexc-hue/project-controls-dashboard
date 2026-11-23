@@ -7,6 +7,7 @@ stay fast and independent of any future sample-data changes.
 from __future__ import annotations
 
 import math
+import warnings
 
 import pandas as pd
 import pytest
@@ -101,3 +102,27 @@ def test_forecast_completion_date_none_on_invalid_spi(bad_spi):
     assert forecast_completion_date(
         spi=bad_spi, project_start="2026-01-01", planned_finish="2026-01-11"
     ) is None
+
+
+# --- 1.2.2: EVM guards --------------------------------------------------------
+
+def test_project_summary_zero_cpi_gives_nan_not_inf():
+    """EV 0 with AC > 0 gives CPI 0. EAC/ETC used to come out as inf and VAC as -inf."""
+    summary = project_summary(_timeseries(pv=100.0, ev=0.0, ac=50.0), bac=1000.0)
+    assert summary["cpi"] == 0
+    for key in ("eac", "etc", "vac"):
+        assert math.isnan(summary[key]), key
+
+
+def test_project_summary_zero_bac_gives_nan_percent_complete_without_warning():
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        summary = project_summary(_timeseries(pv=100.0, ev=90.0, ac=120.0), bac=0.0)
+    assert math.isnan(summary["percent_complete"])
+
+
+def test_project_summary_tcpi_is_nan_once_actual_cost_passes_bac():
+    """With AC over BAC there is no budget left to complete the work in, and the
+    formula used to return a negative TCPI that read as an easy target."""
+    summary = project_summary(_timeseries(pv=1000.0, ev=800.0, ac=1100.0), bac=1000.0)
+    assert math.isnan(summary["tcpi"])
